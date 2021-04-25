@@ -22,6 +22,8 @@ let splitChildProps props =
 [<Emit "Object.entries($0)">]
 let objectEntries (x: obj) : (string * obj) array = jsNative
 
+let (<...>) v = objectEntries v |> unbox
+
 let reOrder (items: 'T array) sourceIndex destinationIndex =
     let mutableList = ResizeArray items
     let item = items.[sourceIndex]
@@ -46,13 +48,10 @@ type Droppable =
 
     static member inline children (f) = prop.custom("children", f)
 
-    static member spread (value: obj) = objectEntries value |> unbox
-
     static member inline create (props : IReactProperty seq) =
         let elements = splitChildProps props
         Interop.reactApi.createElement(droppable, createObj !!elements.Props, !!elements.Children)
 
-let (....) v = objectEntries v |> unbox
 
 type Draggable =
 
@@ -63,8 +62,6 @@ type Draggable =
 
 
     static member inline children (f) = prop.custom("children", f)
-
-    static member inline spread(value: obj) = objectEntries value |> unbox
 
     static member inline create (props : IReactProperty seq) =
         let elements = splitChildProps props

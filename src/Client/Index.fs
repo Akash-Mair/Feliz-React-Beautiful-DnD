@@ -34,12 +34,27 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
 open Feliz
 open Feliz.ReactDragDrop
 
+//let (|DraggableWithinSameColumn|_|) (model, res, destination) =
+//    if (destination.droppableId = res.source.droppableId && res.``type`` <> "column") then
+//        let col = destination.droppableId |> Column.Deserialize
+//        let colItems =
+//            model.Items
+//            |> Array.map (fun (colName, items) ->
+//                if colName = col then
+//                    colName, reOrder items res.source.index destination.index
+//                else colName, items)
+//        Some { model with Items = colItems }
+//    else None
 
 let reOrderItems (model: Model) (res: {| destination: obj; source: {| droppableId: string; index: int |}; ``type``: string |}) =
     match res.destination with
     | null -> model
     | _ ->
         let destination: {| droppableId: string; index: int |} = unbox res.destination
+        //match model, res, destination with
+        //| DraggableWithinSameColumn x -> x
+
+
 
         if (destination.droppableId = res.source.droppableId && res.``type`` <> "column") then
             let col = destination.droppableId |> Column.Deserialize
@@ -85,7 +100,7 @@ let view (model: Model) (dispatch: Msg -> unit) =
                     fun (p:  {| innerRef: Browser.Types.Element -> unit; droppableProps: obj; placeholder: ReactElement |}) ->
                         Html.div [
                             prop.ref p.innerRef
-                            yield!  Droppable.spread p.droppableProps
+                            yield!  (<...>) p.droppableProps
                             prop.style [ style.display.flex; style.height (length.vh 100) ]
                             prop.children [
                                 yield! model.Items
@@ -96,12 +111,12 @@ let view (model: Model) (dispatch: Msg -> unit) =
                                         Draggable.draggableId (string col)
                                         Draggable.children [
                                             fun (d: {| innerRef: Browser.Types.Element -> unit; draggableProps: obj; dragHandleProps: obj |}) ->
-                                                let styles: {| style: obj |} = unbox d.draggableProps
+                                                let props: {| style: obj |} = unbox d.draggableProps
                                                 Html.div [
                                                     prop.ref d.innerRef
-                                                    yield! Draggable.spread d.draggableProps
-                                                    yield! Draggable.spread d.dragHandleProps
-                                                    prop.style [ yield! Draggable.spread styles.style; style.height 300; style.width 150; style.backgroundColor "lightblue"; style.margin 20 ]
+                                                    yield! (<...>) d.draggableProps
+                                                    yield! (<...>) d.dragHandleProps
+                                                    prop.style [ yield! (<...>) props.style; style.height 300; style.width 250; style.backgroundColor "lightblue"; style.margin 20; style.padding 20 ]
                                                     prop.children [
                                                         Droppable.create [
                                                             Droppable.droppableId (string col)
@@ -109,7 +124,7 @@ let view (model: Model) (dispatch: Msg -> unit) =
                                                                 fun (c:  {| innerRef: Browser.Types.Element -> unit; droppableProps: obj; placeholder: ReactElement |}) ->
                                                                     Html.div [
                                                                         prop.ref c.innerRef
-                                                                        yield! Droppable.spread c.droppableProps
+                                                                        yield! (<...>) c.droppableProps
                                                                         prop.children [
                                                                             yield! items
                                                                             |> Array.mapi (fun i item ->
@@ -119,16 +134,12 @@ let view (model: Model) (dispatch: Msg -> unit) =
                                                                                     Draggable.key item
                                                                                     Draggable.children [
                                                                                         fun (x: {| innerRef: Browser.Types.Element -> unit; draggableProps: obj; dragHandleProps: obj |}) ->
-                                                                                            let styles: {| style: obj |} = unbox d.draggableProps
+                                                                                            let props: {| style: obj |} = unbox d.draggableProps
                                                                                             Html.div [
                                                                                                 prop.ref x.innerRef
-                                                                                                yield! Draggable.spread x.dragHandleProps
-                                                                                                yield! Draggable.spread x.draggableProps
+                                                                                                yield! (<...>) x.draggableProps
+                                                                                                yield! (<...>) x.dragHandleProps
                                                                                                 prop.text item
-                                                                                                //prop.children [
-                                                                                                //    Html.div i
-                                                                                                //    Html.div item
-                                                                                                //]
                                                                                             ]
                                                                                     ]
                                                                                 ])
